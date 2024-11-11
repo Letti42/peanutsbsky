@@ -1,0 +1,19 @@
+{
+  "name": "peanuts-comics",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "newpost":"node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@atproto/api": "^0.13.14",
+    "cron": "^3.1.9",
+    "dotenv": "^16.4.5",
+    "process": "^0.11.10"
+  }
+}
