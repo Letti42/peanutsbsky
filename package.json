@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "newpost": "node index.js"
+    "newpost": "npm install && node test.js"
   },
   "keywords": [],
   "author": "",
