@@ -1,22 +1,12 @@
 import fs from 'fs';
 import fetch from 'cross-fetch';
 import request from 'request';
+import {Jimp} from "jimp";
+import { getAllUsedDates } from './posts.js';
 
 const host = "https://gocomics.com/peanuts/";
 const leapYears = [1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996];
 var retries = 0;
-
-
-function getUsedComics() {
-    let used = fs.readFileSync("used", "utf-8").split("\r").join("").split("\n"); //idk how to use regex sry yall
-    return used;
-}
-
-function addUsedComic(date) {
-    let used = getUsedComics();
-    used.push(date);
-    fs.writeFileSync("used", used.join('\n'));
-}
 
 function getCurrentDate() {
     var date = new Date();
@@ -33,21 +23,24 @@ export async function getComic() {
 
     let parsedMonth = `${"0".repeat(2 - month.toString().length)}${month}`;
     let parsedDay = `${"0".repeat(2 - day.toString().length)}${day}`;
-    let year = getValidYear(parsedDay, parsedMonth);
+    let year = await getValidYear(parsedDay, parsedMonth);
 
     let fullDate = `${year}/${parsedMonth}/${parsedDay}`;
 
     let bytes = await getImage(fullDate);
-    if (bytes.length > 1000) addUsedComic(fullDate);
-    else fs.writeFileSync("error.txt", bytes), new Error("error with comic! error log saved");
+    if (bytes.length < 1000) fs.writeFileSync("error.txt", bytes), new Error("error with comic! error log saved");
 
     fs.writeFileSync('today.jpg', bytes);
+    let size = await getImageSize();
+    bytes = await convertToJpg();
+
 
     let response = {
         bytes: bytes,
         date: fullDate,
         currentYear: currentYear,
-        yearReleased: year
+        yearReleased: year,
+        dimensions:size
     };
 
     return response;
@@ -76,8 +69,8 @@ async function getImage(fullDate) {
     });
 }
 
-function getValidYear(day, month) {
-    let usedComics = getUsedComics();
+async function getValidYear(day, month) {
+    let usedComics = await getAllUsedDates();
     let count = 0;
 
     var randYear = Math.floor(Math.random() * 40 + 1960);
@@ -95,3 +88,13 @@ function getValidYear(day, month) {
     return randYear;
 }
 
+async function getImageSize(){
+    let img = await Jimp.read("today.jpg");
+    return [img.width, img.height];
+}
+
+async function convertToJpg(){
+    let img = await Jimp.read("today.jpg");
+    await img.write("today_jpg_real.jpg");
+    return fs.readFileSync("today_jpg_real.jpg");
+}
