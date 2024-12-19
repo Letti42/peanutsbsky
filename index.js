@@ -4,7 +4,7 @@ import fs from 'fs';
 
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const agent = await login();
+await login();
 let data = await getComic();
 let embed = await uploadImage(data.bytes);
 let post = constructPost(data, embed);
@@ -37,7 +37,11 @@ function constructPost(data, embed){
             "images":[
                 {
                     "alt":"Peanuts comic from "+date,
-                    "image":embed.blob
+                    "image":embed.blob,
+                    "aspectRatio": {
+                        "width": data.dimensions[0],
+                        "height": data.dimensions[1]
+                    }
                 }
             ]
         }
